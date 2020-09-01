@@ -71,6 +71,7 @@ app.post("/urls", (req, res) => {
 // POST route to delete an existing short URL account
 app.post("/urls/:shortURL/delete", (req, res) => {
   const deleteURL = req.params.shortURL;
+  console.log(deleteURL);
   delete urlDatabase[deleteURL];
   res.redirect('/urls');
 });
@@ -97,6 +98,7 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+//POST route for loggin out and clearing cookies
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
