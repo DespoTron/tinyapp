@@ -39,7 +39,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-// Get route to urls_show 
+// Get route to urls_show
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   //console.log(req.params.shortURL); keys to our object database
@@ -48,15 +48,15 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // The URL redirection GET route
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
+  const longURL = urlDatabase[req.params.shortURL];
  
   res.redirect(longURL);
 });
 
 
 app.get("/set", (req, res) => {
- const a = 1;
- res.send(`a = ${a}`);
+  const a = 1;
+  res.send(`a = ${a}`);
 });
 
 // app.get("/fetch", (req, res) => {
@@ -68,10 +68,11 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let newURL = req.body.longURL; // save the longURL (www.example.ca) to temp variable
   //console.log(newURL); debugging to check
-  let randomString = generateRandomString(); // generate a random asymateric 6 char string
+  let randomString = generateRandomString(); // generate a random alphanumeric 6 char string
   urlDatabase[randomString] = newURL; // create the new object with the key/value pair
   console.log(urlDatabase); // debugging to check if it was actually created
   res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
+  // redirect directly to website res.redirect('/u/+randomString);
 });
 
 
@@ -80,9 +81,9 @@ app.listen(PORT, () => {
 });
 
 // Generate a string of 6 random alphanumeric characters
-function generateRandomString() {
+const generateRandomString = () => {
   return Math.random().toString(20).substr(2, 6);
-}
+};
 
 // Another way to do app.post
 // app.post("/urls", (req, res) => {
