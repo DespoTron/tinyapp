@@ -11,33 +11,47 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Hello at root
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// our JSON object at /urls.json
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+// Hello World at /hello
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+// Show urls_index at /urls
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+// Create a new URL page urls_new at /urls/new
+// Remember to put /urls/new ahead of /urls/:id so that "new" isn't treated as a short URL id
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// Get route to urls_show 
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   //console.log(req.params.shortURL); keys to our object database
   res.render("urls_show", templateVars);
 });
 
+// The URL redirection GET route
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]
 
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  res.redirect(longURL);
 });
+
 
 app.get("/set", (req, res) => {
  const a = 1;
@@ -48,9 +62,15 @@ app.get("/set", (req, res) => {
 //  res.send(`a = ${a}`);
 // });
 
+// Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let newURL = req.body.longURL; // save the longURL (www.example.ca) to temp variable
+  //console.log(newURL); debugging to check
+  let randomString = generateRandomString(); // generate a random asymateric 6 char string
+  urlDatabase[randomString] = newURL; // create the new object with the key/value pair
+  console.log(urlDatabase); // debugging to check if it was actually created
+  res.send('/urls/' + randomString);         // Respond with 'Ok' (we will replace this) // replaced with a different message
 });
 
 
@@ -59,5 +79,5 @@ app.listen(PORT, () => {
 });
 
 function generateRandomString() {
-  return Math.ranomd().toString(20).substr(2, 6);
+  return Math.random().toString(20).substr(2, 6);
 }
