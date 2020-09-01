@@ -46,22 +46,11 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// The URL redirection GET route
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
- 
-  res.redirect(longURL);
-});
-
-
 app.get("/set", (req, res) => {
   const a = 1;
   res.send(`a = ${a}`);
 });
 
-// app.get("/fetch", (req, res) => {
-//  res.send(`a = ${a}`);
-// });
 
 // Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
@@ -75,13 +64,32 @@ app.post("/urls", (req, res) => {
   // redirect directly to website res.redirect('/u/+randomString);
 });
 
-// POST route to delete an existing account
+// POST route to delete an existing short URL account
 app.post("/urls/:shortURL/delete", (req, res) => {
   const deleteURL = req.params.shortURL;
   delete urlDatabase[deleteURL];
   res.redirect('/urls');
-})
+});
 
+// POST route to change an existing short URL account
+app.post("/urls/:id", (req, res) => {
+  console.log(req.body);
+  let fullURL = req.body.newLongURL;
+  console.log(fullURL)
+  console.log(req.params);
+  let oldShortURL = req.params.id;
+  console.log(oldShortURL);
+  urlDatabase[oldShortURL] = fullURL;
+  // Redirect back to the urls index page
+  res.redirect('/urls');
+});
+
+// The URL redirection GET route
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+ 
+  res.redirect(longURL);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
