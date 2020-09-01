@@ -75,6 +75,13 @@ app.post("/urls", (req, res) => {
   // redirect directly to website res.redirect('/u/+randomString);
 });
 
+// POST route to delete an existing account
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const deleteURL = req.params.shortURL;
+  delete urlDatabase[deleteURL];
+  res.redirect('/urls');
+})
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
