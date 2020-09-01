@@ -70,7 +70,7 @@ app.post("/urls", (req, res) => {
   let randomString = generateRandomString(); // generate a random asymateric 6 char string
   urlDatabase[randomString] = newURL; // create the new object with the key/value pair
   console.log(urlDatabase); // debugging to check if it was actually created
-  res.send('/urls/' + randomString);         // Respond with 'Ok' (we will replace this) // replaced with a different message
+  res.send('/u/' + randomString);         // Respond with 'Ok' (we will replace this) // replaced with a different message
 });
 
 
@@ -78,6 +78,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+// Generate a string of 6 random alphanumeric characters
 function generateRandomString() {
   return Math.random().toString(20).substr(2, 6);
 }
