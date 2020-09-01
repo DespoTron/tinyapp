@@ -7,6 +7,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
+  //shortURL: longURL
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -48,7 +49,7 @@ app.get("/urls/:shortURL", (req, res) => {
 // The URL redirection GET route
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL]
-
+ 
   res.redirect(longURL);
 });
 
@@ -70,7 +71,7 @@ app.post("/urls", (req, res) => {
   let randomString = generateRandomString(); // generate a random asymateric 6 char string
   urlDatabase[randomString] = newURL; // create the new object with the key/value pair
   console.log(urlDatabase); // debugging to check if it was actually created
-  res.send('/u/' + randomString);         // Respond with 'Ok' (we will replace this) // replaced with a different message
+  res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
 });
 
 
@@ -82,3 +83,13 @@ app.listen(PORT, () => {
 function generateRandomString() {
   return Math.random().toString(20).substr(2, 6);
 }
+
+// Another way to do app.post
+// app.post("/urls", (req, res) => {
+//   const newShortURL = generatedRandomString();
+//   const newLongURL = req.body.longURL;
+//   urlDatabase[newShortURL] = newLongURL;
+//   console.log(urlDatabase);
+//   let templateVars = { shortURL: newShortURL, longURL: urlDatabase[newShortURL] };
+//   res.render("urls_show", templateVars);
+// });
