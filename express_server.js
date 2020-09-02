@@ -85,13 +85,20 @@ app.get("/login", (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
- 
   let newID = generateRandomString();
-  res.cookie("user_id", newID);
-  users[newID] = {
-    id: newID,
-    email: email,
-    password: password
+  
+  //checking for edge cases
+  if (!email && !password) {
+    return res.send("Invalid email and password entered");
+  } else if (lookUpEmail(email)) {
+    return res.send("Current user already exists");
+  } else {
+    res.cookie("user_id", newID);
+    users[newID] = {
+      id: newID,
+      email: email,
+      password: password
+    }
   };  
   console.log(users); // check to make sure new user is added to user database
   res.redirect('/urls')
@@ -161,6 +168,16 @@ app.listen(PORT, () => {
 const generateRandomString = () => {
   return Math.random().toString(20).substr(2, 6);
 };
+
+// Function to look up emails curtesy of Andy
+const lookUpEmail = (email) => {
+  for (const user in users) {
+    if (email === users[user].email) {
+      return user;
+    }
+  }
+  return false;
+}
 
 // Another way to do app.post
 // app.post("/urls", (req, res) => {
