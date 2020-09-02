@@ -50,20 +50,20 @@ app.get("/hello", (req, res) => {
 
 // Show urls_index at /urls
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
 });
 
 // Create a new URL page urls_new at /urls/new
 // Remember to put /urls/new ahead of /urls/:id so that "new" isn't treated as a short URL id
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] }
+  let templateVars = { user: users[req.cookies["user_id"]] }
   res.render("urls_new", templateVars);
 });
 
 // Get route to urls_show
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies["user_id"]] };
   //console.log(req.params.shortURL); keys to our object database
   res.render("urls_show", templateVars);
 });
@@ -74,9 +74,13 @@ app.get("/set", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { users: users[req.cookies["user_id"]] };
+  let templateVars = { user: users[req.cookies["user_id"]] };
   res.render('register', templateVars);
 });
+
+app.get("/login", (req, res) => {
+  res.render("login");
+})
 
 app.post('/register', (req, res) => {
   const email = req.body.email;
@@ -91,9 +95,7 @@ app.post('/register', (req, res) => {
   };  
   console.log(users); // check to make sure new user is added to user database
   res.redirect('/urls')
-})
-
-
+});
 
 // Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
