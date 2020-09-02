@@ -79,20 +79,22 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
-})
+  let templateVars = { user: users[req.cookies["user_id"]] };
+  res.render('login', templateVars);
+});
 
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   let newID = generateRandomString();
   
-  //checking for edge cases
+  // checking for edge cases
+  // if user tries to enter empty string for both
   if (!email && !password) {
-    return res.send("Invalid email and password entered");
-  } else if (lookUpEmail(email)) {
-    return res.send("Current user already exists");
-  } else {
+    res.status(400).send("Invalid email and password entered");
+  } else if (lookUpEmail(email)) { // check if the email exist already
+    res.status(400).send("Current user already exists");
+  } else { // create the new user
     res.cookie("user_id", newID);
     users[newID] = {
       id: newID,
@@ -139,16 +141,25 @@ app.post("/urls/:id", (req, res) => {
 
 // POST route for logging in and becoming cookied
 app.post("/login", (req, res) => {
-  // Set a cookie with Express's built in res.cookie
-  const username = req.body.username;
-  res.cookie("username", username);
-  // After logging in, redirect to /urls
-  res.redirect("/urls");
+  const email = req.body.email;
+  const password = req.body.password;
+  let userFound = lookUpEmail(email);
+
+  if(!userFound) {
+    res.status(403).send("User Info does not exist");
+  } else {
+    if (password !== users[userFound].password) {
+      res.status(403).send("User Info does not match")
+    } else {
+      res.cookie("user_id", userFound);
+      res.redirect("/urls");
+    }
+  }
 });
 
 //POST route for loggin out and clearing cookies
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -165,8 +176,8 @@ app.listen(PORT, () => {
 });
 
 // Generate a string of 6 random alphanumeric characters
-const generateRandomString = () => {
-  return Math.random().toString(20).substr(2, 6);
+  const generateRandomString = () => {
+    return Math.random().toString(20).substr(2, 6);
 };
 
 // Function to look up emails curtesy of Andy
