@@ -19,18 +19,18 @@ const urlDatabase = {
 };
 
 // our users database demo
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 
 // Hello at root
@@ -57,7 +57,7 @@ app.get("/urls", (req, res) => {
 // Create a new URL page urls_new at /urls/new
 // Remember to put /urls/new ahead of /urls/:id so that "new" isn't treated as a short URL id
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] }
+  let templateVars = { user: users[req.cookies["user_id"]] };
   res.render("urls_new", templateVars);
 });
 
@@ -100,10 +100,10 @@ app.post('/register', (req, res) => {
       id: newID,
       email: email,
       password: password
-    }
-  };  
+    };
+  }
   console.log(users); // check to make sure new user is added to user database
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 // Post route for new URLs being shortened
@@ -116,7 +116,7 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase); // debugging to check if it was actually created
   res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
   // redirect directly to website res.redirect('/u/+randomString);
-  });
+});
 
 // POST route to delete an existing short URL account
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -130,7 +130,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   console.log(req.body);
   let fullURL = req.body.newLongURL;
-  console.log(fullURL)
+  console.log(fullURL);
   console.log(req.params);
   let oldShortURL = req.params.id;
   console.log(oldShortURL);
@@ -145,11 +145,11 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   let userFound = lookUpEmail(email);
 
-  if(!userFound) {
+  if (!userFound) {
     res.status(403).send("User Info does not exist");
   } else {
     if (password !== users[userFound].password) {
-      res.status(403).send("User Info does not match")
+      res.status(403).send("User Info does not match");
     } else {
       res.cookie("user_id", userFound);
       res.redirect("/urls");
@@ -176,8 +176,8 @@ app.listen(PORT, () => {
 });
 
 // Generate a string of 6 random alphanumeric characters
-  const generateRandomString = () => {
-    return Math.random().toString(20).substr(2, 6);
+const generateRandomString = () => {
+  return Math.random().toString(20).substr(2, 6);
 };
 
 // Function to look up emails curtesy of Andy
@@ -188,7 +188,7 @@ const lookUpEmail = (email) => {
     }
   }
   return false;
-}
+};
 
 // Another way to do app.post
 // app.post("/urls", (req, res) => {
