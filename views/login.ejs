@@ -15,18 +15,17 @@
     <%- include('partials/_header') %>
 
     <main style="margin: 1em;">
-      <a href="/register">New here? Register</a>
       <h2><b>Login</b></h2>
       <form class="form-group" action="/login" method="POST">
         <div class="form-group mb-2">
-          <label for="email"><strong>address</strong></label>
+          <label for="email"><strong>Email address</strong></label>
           <input class="form-control" type="email" name="email"  style="width: 300px" placeholder="Enter email">
         </div>
         <div class="form-group mb-2">
           <label for="password"><strong>Password</strong></label>
           <input class="form-control" type="password" name="password" style="width: 300px" placeholder="Password">    
           <br>
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary">Login</button>
         </div>
       </form>
     </main>
