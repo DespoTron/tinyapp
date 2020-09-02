@@ -11,15 +11,15 @@
       </div>
     </div>
     <% if (user) { %>
-      <h5 style="margin: 2px 4px 0 0; padding-right: 5px;">Logged in as: <%= user.email %></h5>
+      <h5 style="margin: 2px 4px 0 0; padding-right: 5px;">Logged in As: <%= user.email %></h5>
       <form method="POST" action="/logout"> 
         <button type="submit" class="btn btn-outline-dark my-2 my-sm-0">Logout</button>
       </form>
     <% } else { %>
-      <form method="POST" action="/login"> 
-        <input type="text" name="username" placeholder="Username">
-        <button type="submit" class="btn btn-outline-dark my-2 my-sm-0">Login</button>
-      </form>
+      <div class="navbar-nav ml-auto">
+        <a class="nav-item nav-link" href="/login"><h5>Login</h5></a>&nbsp
+        <a class="nav-item nav-link" href="/register"><h5>Register</h5></a>
+      </div>
     <% } %>
   </nav>
 </header>
