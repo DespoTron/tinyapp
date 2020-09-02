@@ -1,9 +1,12 @@
 const express = require('express');
-const app = express();
-const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 
+const app = express();
+const PORT = process.env.PORT || 8080; // default port 8080
+
+app.use(morgan('combined'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -14,6 +17,21 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+// our users database demo
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 
 // Hello at root
 app.get("/", (req, res) => {
@@ -55,6 +73,27 @@ app.get("/set", (req, res) => {
   res.send(`a = ${a}`);
 });
 
+app.get("/register", (req, res) => {
+  let templateVars = { users: users[req.cookies["user_id"]] };
+  res.render('register', templateVars);
+});
+
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+ 
+  let newID = generateRandomString();
+  res.cookie("user_id", newID);
+  users[newID] = {
+    id: newID,
+    email: email,
+    password: password
+  };  
+  console.log(users); // check to make sure new user is added to user database
+  res.redirect('/urls')
+})
+
+
 
 // Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
@@ -66,7 +105,7 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase); // debugging to check if it was actually created
   res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
   // redirect directly to website res.redirect('/u/+randomString);
-});
+  });
 
 // POST route to delete an existing short URL account
 app.post("/urls/:shortURL/delete", (req, res) => {
