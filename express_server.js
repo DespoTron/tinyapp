@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
 
-app.use(morgan('combined'));
+app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -33,15 +33,24 @@ const users = {
   }
 };
 
+// const findUserByEmail = (email) => {
+//   for (const userId in userDatabase) {
+//     const user = userDatabase[userId];
+//     if (user.email === email) {
+//       return user;
+//     }
+//   }
+//   return null;
+// };
 
 // Function to look up emails curtesy of Andy
-const lookUpEmail = (email) => {
+const findUserByEmail = (email) => {
   for (const user in users) {
     if (email === users[user].email) {
       return user;
     }
   }
-  return false;
+  return null;
 };
 
 // Generate a string of 6 random alphanumeric characters
@@ -153,7 +162,7 @@ app.post('/register', (req, res) => {
   // if user tries to enter empty string for both
   if (!email && !password) {
     res.status(400).send("Invalid email and password entered");
-  } else if (lookUpEmail(email)) { // check if the email exist already
+  } else if (findUserByEmail(email)) { // check if the email exist already
     res.status(400).send("Current user already exists");
   } else { // create the new user
     res.cookie("user_id", newID);
@@ -197,22 +206,22 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // POST route to change an existing short URL account
 app.post("/urls/:id", (req, res) => {
-  console.log(req.body);
-  let fullURL = req.body.longURL;
-  console.log(fullURL);
-  console.log(req.params);
-  let oldShortURL = req.params.id;
-  console.log(oldShortURL);
-  urlDatabase[oldShortURL].longURL = fullURL;
-  // Redirect back to the urls index page
-  res.redirect('/urls');
+  const user_id = req.cookies.user_id;
+  if (user_id) {
+    let fullURL = req.body.longURL;
+    let oldShortURL = req.params.id;
+    urlDatabase[oldShortURL].longURL = fullURL;
+    res.redirect('/urls');
+  } else {
+    res.redirect("/login"); 
+  }
 });
 
 // POST route for logging in and becoming cookied
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let userFound = lookUpEmail(email);
+  let userFound = findUserByEmail(email);
 
   if (!userFound) {
     res.status(403).send("User Info does not exist");
