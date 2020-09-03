@@ -14,14 +14,14 @@ app.set("view engine", "ejs");
 
 const urlDatabase = {
   //shortURL: longURL
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b6UTxQ": { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  "i3BoGr": { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 // our users database demo
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
+  "aJ48lW": {
+    id: "aJ48lW",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
@@ -49,6 +49,7 @@ app.get("/hello", (req, res) => {
 });
 
 // Show urls_index at /urls
+// Show urls_index at /urls
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render("urls_index", templateVars);
@@ -57,8 +58,13 @@ app.get("/urls", (req, res) => {
 // Create a new URL page urls_new at /urls/new
 // Remember to put /urls/new ahead of /urls/:id so that "new" isn't treated as a short URL id
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
-  res.render("urls_new", templateVars);
+  if (req.cookies["user_id"]) {
+    let templateVars = { user: users[req.cookies["user_id"]] };
+    res.render("urls_new", templateVars);
+  } else {
+    let templateVars = { user: users[req.cookies["user_id"]] };
+    res.render("login", templateVars);
+  }
 });
 
 // Get route to urls_show
@@ -66,11 +72,6 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies["user_id"]] };
   //console.log(req.params.shortURL); keys to our object database
   res.render("urls_show", templateVars);
-});
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
 });
 
 app.get("/register", (req, res) => {
@@ -81,6 +82,11 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   let templateVars = { user: users[req.cookies["user_id"]] };
   res.render('login', templateVars);
+});
+
+app.get("/set", (req, res) => {
+  const a = 1;
+  res.send(`a = ${a}`);
 });
 
 app.post('/register', (req, res) => {
@@ -166,9 +172,12 @@ app.post("/logout", (req, res) => {
 
 // The URL redirection GET route
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
- 
-  res.redirect(longURL);
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  if (urlDatabase[req.params.shortURL]) {
+    res.redirect(longURL);
+    } else {
+      res.redirect("/urls/new");
+    } 
 });
 
 app.listen(PORT, () => {
@@ -183,12 +192,25 @@ const generateRandomString = () => {
 // Function to look up emails curtesy of Andy
 const lookUpEmail = (email) => {
   for (const user in users) {
-    if (email === users[user].email) {
-      return user;
+    if (users[user].email === email) {
+      return true;
     }
   }
   return false;
 };
+
+// const findUserID = function(id) {
+//   const database = {};
+//   for (const url in urlDatabase) {
+//     if (urlDatabase[url].userID === id) {
+//       database[url] = urlDatabase[url]
+//     }
+//   }
+//   return database
+// }
+
+
+
 
 // Another way to do app.post
 // app.post("/urls", (req, res) => {
