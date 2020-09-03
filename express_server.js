@@ -59,7 +59,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id;
   if (user_id) {
-    const userURLs = urlsForUser(user_id);
+    const userURLs = urlsForUser(user_id, urlDatabase);
     let templateVars = { urls: userURLs, user: users[req.session["user_id"]] };
     res.render("urls_index", templateVars);
   } else {
@@ -201,15 +201,15 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let userFound = getUserByEmail(email, users);
-
+  const userFound = getUserByEmail(email, users);
+  
   if (!userFound) {
     res.status(403).send("User Info does not exist");
   } else {
-    if (!bcrypt.compareSync(password, users[userFound].password)) {
+    if (!bcrypt.compareSync(password, userFound.password)) {
       res.status(403).send("User Info does not match");
     } else {
-      req.session.user_id = userFound
+      req.session.user_id = userFound.id
       //res.cookie("user_id", userFound);
       res.redirect("/urls");
     }
