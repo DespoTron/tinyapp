@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const morgan = require('morgan');
 const bcrypt = require('bcrypt');
 
@@ -8,8 +8,12 @@ const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
 
 app.use(morgan('dev'));
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2'],
+}));
 
 app.set("view engine", "ejs");
 
@@ -81,10 +85,10 @@ app.get("/hello", (req, res) => {
 
 // Show urls_index at /urls
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     const userURLs = urlsForUser(user_id);
-    let templateVars = { urls: userURLs, user: users[req.cookies["user_id"]] };
+    let templateVars = { urls: userURLs, user: users[req.session["user_id"]] };
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/login");
@@ -94,9 +98,9 @@ app.get("/urls", (req, res) => {
 // Create a new URL page urls_new at /urls/new
 // Remember to put /urls/new ahead of /urls/:id so that "new" isn't treated as a short URL id
 app.get("/urls/new", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
-    let templateVars = { user: users[req.cookies["user_id"]] };
+    let templateVars = { user: users[req.session["user_id"]] };
     res.render("urls_new", templateVars);
   } else {
     res.redirect("/login");
@@ -105,9 +109,9 @@ app.get("/urls/new", (req, res) => {
 
 // Get route to urls_show
 app.get("/urls/:shortURL", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
-    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
+    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session["user_id"]] };
     res.render("urls_show", templateVars);
   } else {
     res.redirect("/login");
@@ -122,18 +126,18 @@ app.get("/set", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
+  let templateVars = { user: users[req.session["user_id"]] };
   res.render('register', templateVars);
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = { user: users[req.cookies["user_id"]] };
+  let templateVars = { user: users[req.session["user_id"]] };
   res.render('login', templateVars);
 });
 
 // The URL redirection GET route
 app.get("/u/:shortURL", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
     res.redirect(longURL);
@@ -159,7 +163,8 @@ app.post('/register', (req, res) => {
   } else if (findUserByEmail(email)) { // check if the email exist already
     res.status(400).send("Current user already exists");
   } else { // create the new user
-    res.cookie("user_id", newID);
+    req.session.user_id = newID
+    //res.cookie("user_id", newID);
     users[newID] = {
       id: newID,
       email: email,
@@ -173,7 +178,7 @@ app.post('/register', (req, res) => {
 // Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  let user_id = req.cookies.user_id;
+  let user_id = req.session.user_id;
   console.log(user_id)
   let newURL = req.body.longURL; // save the longURL (www.example.ca) to temp variable
   //console.log(newURL); debugging to check
@@ -196,7 +201,7 @@ app.post("/urls", (req, res) => {
 
 // POST route to delete an existing short URL account
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     const deleteURL = req.params.shortURL;
     delete urlDatabase[deleteURL];
@@ -209,7 +214,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // POST route to change an existing short URL account
 app.post("/urls/:id", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   if (user_id) {
     let fullURL = req.body.longURL;
     let oldShortURL = req.params.id;
@@ -232,7 +237,8 @@ app.post("/login", (req, res) => {
     if (!bcrypt.compareSync(password, users[userFound].password)) {
       res.status(403).send("User Info does not match");
     } else {
-      res.cookie("user_id", userFound);
+      req.session.user_id = userFound
+      //res.cookie("user_id", userFound);
       res.redirect("/urls");
     }
   }
@@ -240,7 +246,8 @@ app.post("/login", (req, res) => {
 
 //POST route for loggin out and clearing cookies
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session.user_id = null;
+ //res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
