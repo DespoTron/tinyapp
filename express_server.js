@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
@@ -19,6 +20,9 @@ const urlDatabase = {
   i245G3: { longURL: "https://www.yahoo.ca", userID: "bb1234"}
 };
 
+const password = "purple-monkey-dinosaur";
+const hashPassword = bcrypt.hashSync(password, 10);
+
 // our users database demo
 const users = {
   "userRandomID": {
@@ -29,19 +33,9 @@ const users = {
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "dishwasher-funk" 
   }
 };
-
-// const findUserByEmail = (email) => {
-//   for (const userId in userDatabase) {
-//     const user = userDatabase[userId];
-//     if (user.email === email) {
-//       return user;
-//     }
-//   }
-//   return null;
-// };
 
 // Function to look up emails curtesy of Andy
 const findUserByEmail = (email) => {
@@ -169,7 +163,7 @@ app.post('/register', (req, res) => {
     users[newID] = {
       id: newID,
       email: email,
-      password: password
+      password: bcrypt.hashSync(password, 10) // add bcrypt here bcrypt.hashSync(password,  3)
     };
   }
   console.log(users); // check to make sure new user is added to user database
@@ -189,6 +183,15 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase); // debugging to check if it was actually created
   res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
   // redirect directly to website res.redirect('/u/+randomString);
+
+  // const user_id = req.cookies.user_id;
+  // if (user_id) {
+  //   const userURLs = urlsForUser(user_id);
+  //   let templateVars = { urls: userURLs, user: users[req.cookies["user_id"]] };
+  //   res.render("urls_index", templateVars);
+  // } else {
+  //   res.redirect("/login");
+  // }
 });
 
 // POST route to delete an existing short URL account
@@ -198,7 +201,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     const deleteURL = req.params.shortURL;
     delete urlDatabase[deleteURL];
     res.redirect('/urls');
-  } else {
+} else {
     res.redirect("/urls");
   }
 
@@ -226,7 +229,7 @@ app.post("/login", (req, res) => {
   if (!userFound) {
     res.status(403).send("User Info does not exist");
   } else {
-    if (password !== users[userFound].password) {
+    if (!bcrypt.compareSync(password, users[userFound].password)) {
       res.status(403).send("User Info does not match");
     } else {
       res.cookie("user_id", userFound);
