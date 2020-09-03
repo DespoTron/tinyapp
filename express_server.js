@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const morgan = require('morgan');
 const bcrypt = require('bcrypt');
-const { getUserByEmail } = require('./helpers')
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers')
 
 
 const app = express();
@@ -39,25 +39,6 @@ const users = {
     password: "dishwasher-funk" 
   }
 };
-
-
-
-// Generate a string of 6 random alphanumeric characters
-const generateRandomString = () => {
-  return Math.random().toString(20).substr(2, 6);
-};
-
-const urlsForUser = (id) => {
-  const userURLDatabase = {};  
-  for (const url in urlDatabase) {
-    if(urlDatabase[url].userID === id) {
-      userURLDatabase[url] = urlDatabase[url];
-    }
-  }
-  return userURLDatabase;
-};
-console.log(urlsForUser("bb1234"))
-
 
 // Hello at root
 app.get("/", (req, res) => {
