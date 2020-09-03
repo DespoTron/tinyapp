@@ -26,9 +26,6 @@ const urlDatabase = {
   i245G3: { longURL: "https://www.yahoo.ca", userID: "bb1234"}
 };
 
-const password = "purple-monkey-dinosaur";
-const hashPassword = bcrypt.hashSync(password, 10);
-
 // our users database demo
 const users = {
   "userRandomID": {
