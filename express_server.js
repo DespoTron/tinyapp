@@ -42,9 +42,9 @@ const users = {
 };
 
 // Function to look up emails curtesy of Andy
-const findUserByEmail = (email) => {
-  for (const user in users) {
-    if (email === users[user].email) {
+const getUserByEmail = (email, database) => {
+  for (const user in database) {
+    if (database[user].email === email) {
       return user;
     }
   }
@@ -160,7 +160,7 @@ app.post('/register', (req, res) => {
   // if user tries to enter empty string for both
   if (!email && !password) {
     res.status(400).send("Invalid email and password entered");
-  } else if (findUserByEmail(email)) { // check if the email exist already
+  } else if (getUserByEmail(email, users)) { // check if the email exist already
     res.status(400).send("Current user already exists");
   } else { // create the new user
     req.session.user_id = newID
@@ -229,7 +229,7 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let userFound = findUserByEmail(email);
+  let userFound = getUserByEmail(email, users);
 
   if (!userFound) {
     res.status(403).send("User Info does not exist");
