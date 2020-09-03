@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { getUserByEmail } = require('../helpers.js');
+const { getUserByEmail, generateRandomString, urlsForUser } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -15,6 +15,12 @@ const testUsers = {
   }
 };
 
+const testURLDatabase = {
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i245bv: { longURL: "https://www.youtube.ca", userID: "bb1234" },
+  i245G3: { longURL: "https://www.yahoo.ca", userID: "bb1234"}
+};
+
 describe('getUserByEmail', function() {
   it('should return a user with valid email', function() {
     const user = getUserByEmail("user@example.com", testUsers);
@@ -23,14 +29,42 @@ describe('getUserByEmail', function() {
   });
 
   it('should return a user object when provided with an existing email', function() {
-    const user = getUserByEmail("user@example.com", testUsers);
-    const expectedOutput = user;
-    assert.strictEqual(user, user);
+    const actual = getUserByEmail("user@example.com", testUsers);
+    const expectedOutput = actual;
+    assert.strictEqual(actual, actual);
   });  
 
   it('should return undefined with a non-existent email', function() {
-    const user = getUserByEmail("invalid@example.com", testUsers);
+    const actual = getUserByEmail("invalid@example.com", testUsers);
     const expectedOutput = undefined;
-    assert.strictEqual(user, expectedOutput);
+    assert.strictEqual(actual, expectedOutput);
   });  
+});
+
+describe('generateRandomString', function() {
+  it('should return a string', function() {
+    const actual = typeof generateRandomString();
+    const expected = "string";
+    assert.strictEqual(actual, expected);
+  });
+
+  it('should return false between two random strings', function() {
+    const actual = generateRandomString() === generateRandomString();
+    const expected = false;
+    assert.strictEqual(actual, expected);
+  });
+});
+
+describe('urlsForUser', function() {
+  it('should return an empty object if user has no shortURL', function() {
+    const actual = urlsForUser("user", testURLDatabase);
+    const expected = {};
+    assert.deepEqual(actual, expected);
+  });
+
+  it('should return an object with shortURL for user', function() {
+    const actual = urlsForUser("aJ48lW", testURLDatabase);
+    const expected = { b6UTxQ: { longURL: 'https://www.tsn.ca', userID: 'aJ48lW' } };
+    assert.deepEqual(actual, expected);
+  });
 });
