@@ -14,7 +14,9 @@ app.set("view engine", "ejs");
 
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
+  i245bv: { longURL: "https://www.youtube.ca", userID: "bb1234" },
+  i245G3: { longURL: "https://www.yahoo.ca", userID: "bb1234"}
 };
 
 // our users database demo
@@ -30,6 +32,33 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+
+
+// Function to look up emails curtesy of Andy
+const lookUpEmail = (email) => {
+  for (const user in users) {
+    if (email === users[user].email) {
+      return user;
+    }
+  }
+  return false;
+};
+
+// Generate a string of 6 random alphanumeric characters
+const generateRandomString = () => {
+  return Math.random().toString(20).substr(2, 6);
+};
+
+const urlsForUser = (id) => {
+  const userURLDatabase = {};  
+  for (const url in urlDatabase) {
+    if(urlDatabase[url].userID === id) {
+      userURLDatabase[url] = urlDatabase[url];
+    }
+  }
+  return userURLDatabase;
+};
+console.log(urlsForUser("bb1234"))
 
 
 // Hello at root
@@ -51,7 +80,8 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies.user_id;
   if (user_id) {
-    let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+    const userURLs = urlsForUser(user_id);
+    let templateVars = { urls: userURLs, user: users[req.cookies["user_id"]] };
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/login");
@@ -72,10 +102,15 @@ app.get("/urls/new", (req, res) => {
 
 // Get route to urls_show
 app.get("/urls/:shortURL", (req, res) => {
-  
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
+  const user_id = req.cookies.user_id;
+  if (user_id) {
+    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
+    res.render("urls_show", templateVars);
+  } else {
+    res.redirect("/login");
+  }
   //console.log(req.params.shortURL); keys to our object database
-  res.render("urls_show", templateVars);
+  //res.render("urls_show", templateVars);
 });
 
 app.get("/set", (req, res) => {
@@ -95,9 +130,13 @@ app.get("/login", (req, res) => {
 
 // The URL redirection GET route
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
- 
-  res.redirect(longURL);
+  const user_id = req.cookies.user_id;
+  if (user_id) {
+    const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 
@@ -145,10 +184,15 @@ app.post("/urls", (req, res) => {
 
 // POST route to delete an existing short URL account
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const deleteURL = req.params.shortURL;
-  console.log(deleteURL);
-  delete urlDatabase[deleteURL];
-  res.redirect('/urls');
+  const user_id = req.cookies.user_id;
+  if (user_id) {
+    const deleteURL = req.params.shortURL;
+    delete urlDatabase[deleteURL];
+    res.redirect('/urls');
+  } else {
+    res.redirect("/urls");
+  }
+
 });
 
 // POST route to change an existing short URL account
@@ -193,20 +237,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-// Generate a string of 6 random alphanumeric characters
-const generateRandomString = () => {
-  return Math.random().toString(20).substr(2, 6);
-};
 
-// Function to look up emails curtesy of Andy
-const lookUpEmail = (email) => {
-  for (const user in users) {
-    if (email === users[user].email) {
-      return user;
-    }
-  }
-  return false;
-};
 
 // Another way to do app.post
 // app.post("/urls", (req, res) => {
