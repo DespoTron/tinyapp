@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const morgan = require('morgan');
 const bcrypt = require('bcrypt');
+const { getUserByEmail } = require('./helpers')
+
 
 const app = express();
 const PORT = process.env.PORT || 8080; // default port 8080
@@ -41,15 +43,7 @@ const users = {
   }
 };
 
-// Function to look up emails curtesy of Andy
-const getUserByEmail = (email, database) => {
-  for (const user in database) {
-    if (database[user].email === email) {
-      return user;
-    }
-  }
-  return null;
-};
+
 
 // Generate a string of 6 random alphanumeric characters
 const generateRandomString = () => {
