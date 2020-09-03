@@ -13,15 +13,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  //shortURL: longURL
-  "b6UTxQ": { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  "i3BoGr": { longURL: "https://www.google.ca", userID: "aJ48lW" }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 // our users database demo
 const users = {
-  "aJ48lW": {
-    id: "aJ48lW",
+  "userRandomID": {
+    id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
@@ -49,29 +48,39 @@ app.get("/hello", (req, res) => {
 });
 
 // Show urls_index at /urls
-// Show urls_index at /urls
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
-  res.render("urls_index", templateVars);
+  const user_id = req.cookies.user_id;
+  if (user_id) {
+    let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+    res.render("urls_index", templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // Create a new URL page urls_new at /urls/new
 // Remember to put /urls/new ahead of /urls/:id so that "new" isn't treated as a short URL id
 app.get("/urls/new", (req, res) => {
-  if (req.cookies["user_id"]) {
+  const user_id = req.cookies.user_id;
+  if (user_id) {
     let templateVars = { user: users[req.cookies["user_id"]] };
     res.render("urls_new", templateVars);
   } else {
-    let templateVars = { user: users[req.cookies["user_id"]] };
-    res.render("login", templateVars);
+    res.redirect("/login");
   }
 });
 
 // Get route to urls_show
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user: users[req.cookies["user_id"]] };
+  
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.cookies["user_id"]] };
   //console.log(req.params.shortURL); keys to our object database
   res.render("urls_show", templateVars);
+});
+
+app.get("/set", (req, res) => {
+  const a = 1;
+  res.send(`a = ${a}`);
 });
 
 app.get("/register", (req, res) => {
@@ -84,10 +93,17 @@ app.get("/login", (req, res) => {
   res.render('login', templateVars);
 });
 
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
+// The URL redirection GET route
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+ 
+  res.redirect(longURL);
 });
+
+
+
+// <------------------- POST ------------------->
+
 
 app.post('/register', (req, res) => {
   const email = req.body.email;
@@ -115,10 +131,13 @@ app.post('/register', (req, res) => {
 // Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
+  let user_id = req.cookies.user_id;
+  console.log(user_id)
   let newURL = req.body.longURL; // save the longURL (www.example.ca) to temp variable
   //console.log(newURL); debugging to check
   let randomString = generateRandomString(); // generate a random alphanumeric 6 char string
-  urlDatabase[randomString] = newURL; // create the new object with the key/value pair
+  console.log(urlDatabase)
+  urlDatabase[randomString] = { longURL: newURL, userID: user_id }; // create the new object with the key/value pair
   console.log(urlDatabase); // debugging to check if it was actually created
   res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
   // redirect directly to website res.redirect('/u/+randomString);
@@ -135,12 +154,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // POST route to change an existing short URL account
 app.post("/urls/:id", (req, res) => {
   console.log(req.body);
-  let fullURL = req.body.newLongURL;
+  let fullURL = req.body.longURL;
   console.log(fullURL);
   console.log(req.params);
   let oldShortURL = req.params.id;
   console.log(oldShortURL);
-  urlDatabase[oldShortURL] = fullURL;
+  urlDatabase[oldShortURL].longURL = fullURL;
   // Redirect back to the urls index page
   res.redirect('/urls');
 });
@@ -170,16 +189,6 @@ app.post("/logout", (req, res) => {
 });
 
 
-// The URL redirection GET route
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (urlDatabase[req.params.shortURL]) {
-    res.redirect(longURL);
-    } else {
-      res.redirect("/urls/new");
-    } 
-});
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -192,25 +201,12 @@ const generateRandomString = () => {
 // Function to look up emails curtesy of Andy
 const lookUpEmail = (email) => {
   for (const user in users) {
-    if (users[user].email === email) {
-      return true;
+    if (email === users[user].email) {
+      return user;
     }
   }
   return false;
 };
-
-// const findUserID = function(id) {
-//   const database = {};
-//   for (const url in urlDatabase) {
-//     if (urlDatabase[url].userID === id) {
-//       database[url] = urlDatabase[url]
-//     }
-//   }
-//   return database
-// }
-
-
-
 
 // Another way to do app.post
 // app.post("/urls", (req, res) => {
