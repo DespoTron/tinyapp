@@ -195,23 +195,23 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userFound = getUserByEmail(email, users);
+  const userFound = getUserByEmail(users, email);
   
-  if (!userFound) {
-    res.status(403).send("User Info does not exist");
-  } else {
-    if (!bcrypt.compareSync(password, userFound.password)) {
-      res.status(403).send("User Info does not match");
-    } else {
+  if (userFound) {
+    if (bcrypt.compareSync(password, userFound.password)) {
       req.session.user_id = userFound.id;
       res.redirect("/urls");
+    } else {
+      res.status(403).send('<html><body><h2>Password is not correct</h2></body></html>'); 
     }
+  } else {
+    res.status(403).send('<html><body><h2>This email does not exist</h2></body></html>');
   }
 });
 
 //POST route for loggin out and clearing cookies
 app.post("/logout", (req, res) => {
-  req.session.user_id = null;
+  req.session= null;
   //res.clearCookie("user_id");
   res.redirect("/urls");
 });
