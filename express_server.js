@@ -1,4 +1,4 @@
-// SETUP 
+// SETUP
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const express = require('express');
 const bcrypt = require('bcrypt');
@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 8080;
 
 // IMPORTED HELPER FUNCTIONS
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers')
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
 
 app.set("view engine", "ejs");
 app.use(morgan('dev'));
@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
 
 app.use(cookieSession({
-name: 'session',
+  name: 'session',
   keys: ['key1', 'key2'],
 }));
 
@@ -46,7 +46,7 @@ const users = {
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk" 
+    password: "dishwasher-funk"
   }
 };
 
@@ -143,10 +143,10 @@ app.post('/register', (req, res) => {
   // if user tries to enter empty string for both
   if (!email && !password) {
     res.status(400).send("Invalid email and password entered");
-  } else if (getUserByEmail(email, users)) { 
+  } else if (getUserByEmail(email, users)) {
     res.status(400).send("Current user already exists");
-  } else { 
-    req.session.user_id = newID
+  } else {
+    req.session.user_id = newID;
     users[newID] = {
       id: newID,
       email: email,
@@ -162,7 +162,7 @@ app.post("/urls", (req, res) => {
   let newURL = req.body.longURL; // save the longURL (www.example.ca) to temp variable
   let randomString = generateRandomString(); // generate a random alphanumeric 6 char string
   urlDatabase[randomString] = { longURL: newURL, userID: user_id }; // create the new object with the key/value pair
-  res.redirect('/urls');         
+  res.redirect('/urls');
 });
 
 // POST route to delete an existing short URL account
@@ -172,7 +172,7 @@ app.delete("/urls/:shortURL/delete", (req, res) => {
     const deleteURL = req.params.shortURL;
     delete urlDatabase[deleteURL];
     res.redirect('/urls');
-} else {
+  } else {
     res.redirect("/urls");
   }
 
@@ -187,7 +187,7 @@ app.post("/urls/:id", (req, res) => {
     urlDatabase[oldShortURL].longURL = fullURL;
     res.redirect('/urls');
   } else {
-    res.redirect("/login"); 
+    res.redirect("/login");
   }
 });
 
@@ -203,7 +203,7 @@ app.post("/login", (req, res) => {
     if (!bcrypt.compareSync(password, userFound.password)) {
       res.status(403).send("User Info does not match");
     } else {
-      req.session.user_id = userFound.id
+      req.session.user_id = userFound.id;
       res.redirect("/urls");
     }
   }
@@ -212,7 +212,7 @@ app.post("/login", (req, res) => {
 //POST route for loggin out and clearing cookies
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
- //res.clearCookie("user_id");
+  //res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
