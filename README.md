@@ -4,8 +4,10 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["screenshot of Main URLs page"](https://github.com/DespoTron/tinyapp/blob/master/docs/Main-URL-Page.png)
+!["screenshot of Login Page"](https://github.com/DespoTron/tinyapp/blob/master/docs/Login-Page.png)
+!["screenshot of Creating a New URL Link"](https://github.com/DespoTron/tinyapp/blob/master/docs/Create-New-URL-Page.png)
+!["screenshot of Registration Page"](https://github.com/DespoTron/tinyapp/blob/master/docs/Registration-Page.png)
 
 ## Dependencies
 
