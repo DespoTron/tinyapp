@@ -101,8 +101,6 @@ app.get("/urls/:shortURL", (req, res) => {
   } else {
     res.redirect("/login");
   }
-  //console.log(req.params.shortURL); keys to our object database
-  //res.render("urls_show", templateVars);
 });
 
 app.get("/set", (req, res) => {
@@ -145,43 +143,26 @@ app.post('/register', (req, res) => {
   // if user tries to enter empty string for both
   if (!email && !password) {
     res.status(400).send("Invalid email and password entered");
-  } else if (getUserByEmail(email, users)) { // check if the email exist already
+  } else if (getUserByEmail(email, users)) { 
     res.status(400).send("Current user already exists");
-  } else { // create the new user
+  } else { 
     req.session.user_id = newID
-    //res.cookie("user_id", newID);
     users[newID] = {
       id: newID,
       email: email,
-      password: bcrypt.hashSync(password, 10) // add bcrypt here bcrypt.hashSync(password,  3)
+      password: bcrypt.hashSync(password, 10)
     };
   }
-  console.log(users); // check to make sure new user is added to user database
   res.redirect('/urls');
 });
 
 // Post route for new URLs being shortened
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   let user_id = req.session.user_id;
-  console.log(user_id)
   let newURL = req.body.longURL; // save the longURL (www.example.ca) to temp variable
-  //console.log(newURL); debugging to check
   let randomString = generateRandomString(); // generate a random alphanumeric 6 char string
-  console.log(urlDatabase)
   urlDatabase[randomString] = { longURL: newURL, userID: user_id }; // create the new object with the key/value pair
-  console.log(urlDatabase); // debugging to check if it was actually created
-  res.redirect('/urls');         // Respond with 'Ok' (we will replace this) // replaced with a different message
-  // redirect directly to website res.redirect('/u/+randomString);
-
-  // const user_id = req.cookies.user_id;
-  // if (user_id) {
-  //   const userURLs = urlsForUser(user_id);
-  //   let templateVars = { urls: userURLs, user: users[req.cookies["user_id"]] };
-  //   res.render("urls_index", templateVars);
-  // } else {
-  //   res.redirect("/login");
-  // }
+  res.redirect('/urls');         
 });
 
 // POST route to delete an existing short URL account
@@ -223,7 +204,6 @@ app.post("/login", (req, res) => {
       res.status(403).send("User Info does not match");
     } else {
       req.session.user_id = userFound.id
-      //res.cookie("user_id", userFound);
       res.redirect("/urls");
     }
   }
