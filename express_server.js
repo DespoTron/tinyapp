@@ -1,32 +1,42 @@
+// SETUP 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const express = require('express');
-const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session');
-const morgan = require('morgan');
 const bcrypt = require('bcrypt');
+const app = express();
+
+// MIDDLEWARE
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const cookieSession = require('cookie-session');
+const bodyParser = require("body-parser");
+const morgan = require('morgan');
+const methodOverride = require('method-override');
+
+// default port 8080
+const PORT = process.env.PORT || 8080;
+
+// IMPORTED HELPER FUNCTIONS
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers')
 
-
-const app = express();
-const PORT = process.env.PORT || 8080; // default port 8080
-
+app.set("view engine", "ejs");
 app.use(morgan('dev'));
-//app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride('_method'));
+
 app.use(cookieSession({
-  name: 'session',
+name: 'session',
   keys: ['key1', 'key2'],
 }));
 
-app.set("view engine", "ejs");
-
+// DATABASES
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" },
   i245bv: { longURL: "https://www.youtube.ca", userID: "bb1234" },
-  i245G3: { longURL: "https://www.yahoo.ca", userID: "bb1234"}
+  i245G3: { longURL: "https://www.yahoo.ca", userID: "bb1234" }
 };
 
-// our users database demo
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -40,9 +50,12 @@ const users = {
   }
 };
 
-// Hello at root
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // our JSON object at /urls.json
@@ -172,7 +185,7 @@ app.post("/urls", (req, res) => {
 });
 
 // POST route to delete an existing short URL account
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL/delete", (req, res) => {
   const user_id = req.session.user_id;
   if (user_id) {
     const deleteURL = req.params.shortURL;
@@ -227,15 +240,3 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-
-// Another way to do app.post
-// app.post("/urls", (req, res) => {
-//   const newShortURL = generatedRandomString();
-//   const newLongURL = req.body.longURL;
-//   urlDatabase[newShortURL] = newLongURL;
-//   console.log(urlDatabase);
-//   let templateVars = { shortURL: newShortURL, longURL: urlDatabase[newShortURL] };
-//   res.render("urls_show", templateVars);
-// });
