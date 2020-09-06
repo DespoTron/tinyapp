@@ -46,7 +46,8 @@ const users = {
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    //password: "dishwasher-funk"
+    password: "$2b$10$xzR8ljKTfFzriKTQQ/ZgYuLz1BI.m8D.fZlIF4RORPshxmxWECege"
   }
 };
 
@@ -56,16 +57,6 @@ app.get("/", (req, res) => {
   } else {
     res.redirect("/login");
   }
-});
-
-// our JSON object at /urls.json
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-// Hello World at /hello
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 // Show urls_index at /urls
@@ -95,17 +86,13 @@ app.get("/urls/new", (req, res) => {
 // Get route to urls_show
 app.get("/urls/:shortURL", (req, res) => {
   const user_id = req.session.user_id;
-  if (user_id) {
-    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session["user_id"]] };
+  //if (user_id)
+  if (urlDatabase[req.params.shortURL].userID === user_id) {
+    let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, user: users[req.session[user_id]] };
     res.render("urls_show", templateVars);
   } else {
     res.redirect("/login");
   }
-});
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
 });
 
 app.get("/register", (req, res) => {
@@ -138,12 +125,12 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   let newID = generateRandomString();
-  
+
   // checking for edge cases
   // if user tries to enter empty string for both
   if (!email && !password) {
     res.status(400).send("Invalid email and password entered");
-  } else if (getUserByEmail(email, users)) {
+  } else if (getUserByEmail(users, email)) {
     res.status(400).send("Current user already exists");
   } else {
     req.session.user_id = newID;
@@ -179,7 +166,7 @@ app.delete("/urls/:shortURL/delete", (req, res) => {
 });
 
 // POST route to change an existing short URL account
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
   if (user_id) {
     let fullURL = req.body.longURL;
@@ -195,8 +182,8 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+
   const userFound = getUserByEmail(users, email);
-  
   if (userFound) {
     if (bcrypt.compareSync(password, userFound.password)) {
       req.session.user_id = userFound.id;
